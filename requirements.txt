@@ -1,0 +1,14 @@
+# Django and libs
+Django==4.2
+djangorestframework==3.14.0
+django-environ==0.10.0
+django-choices==1.7.2
+
+
+# DataBase
+psycopg2-binary==2.9.5
+
+
+# other common packages
+celery==5.2.7
+redis==4.5.4

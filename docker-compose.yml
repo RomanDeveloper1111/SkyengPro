@@ -1,0 +1,57 @@
+version: "3"
+
+services:
+
+  db:
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: back-django:dev
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: skypro.settings.settings
+    command: bash -c "
+      python manage.py migrate
+      && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    volumes:
+      - ./skypro:/src/
+
+  redis:
+    image: redis:5-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - 6379
+    volumes:
+      - redis_data:/data
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "
+      celery -A skypro.celery_tasks worker -l info"
+    volumes:
+      - ./skypro:/src
+    env_file: .env
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  postgres_data:
+  redis_data:
+
+
